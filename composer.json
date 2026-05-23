@@ -1,17 +1,17 @@
 {
-    "name": ":vendor_slug/:package_slug",
-    "description": ":package_description",
+    "name": "uwakmfon1/laravel-logs-cleanup",
+    "description": "This is my package laravel-logs-cleanup",
     "keywords": [
-        ":vendor_name",
+        "Uwakmfon1",
         "laravel",
-        ":package_slug"
+        "laravel-logs-cleanup"
     ],
-    "homepage": "https://github.com/:vendor_slug/:package_slug",
+    "homepage": "https://github.com/uwakmfon1/laravel-logs-cleanup",
     "license": "MIT",
     "authors": [
         {
-            "name": ":author_name",
-            "email": "author@domain.com",
+            "name": "Uwakmfon1",
+            "email": "udohuwakmfon2@gmail.com",
             "role": "Developer"
         }
     ],
@@ -35,13 +35,13 @@
     },
     "autoload": {
         "psr-4": {
-            "VendorName\\Skeleton\\": "src/",
-            "VendorName\\Skeleton\\Database\\Factories\\": "database/factories/"
+            "Uwakmfon1\\LaravelLogsCleanup\\": "src/",
+            "Uwakmfon1\\LaravelLogsCleanup\\Database\\Factories\\": "database/factories/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "VendorName\\Skeleton\\Tests\\": "tests/",
+            "Uwakmfon1\\LaravelLogsCleanup\\Tests\\": "tests/",
             "Workbench\\App\\": "workbench/app/"
         }
     },
@@ -63,10 +63,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "VendorName\\Skeleton\\SkeletonServiceProvider"
+                "Uwakmfon1\\LaravelLogsCleanup\\LaravelLogsCleanupServiceProvider"
             ],
             "aliases": {
-                "Skeleton": "VendorName\\Skeleton\\Facades\\Skeleton"
+                "LaravelLogsCleanup": "Uwakmfon1\\LaravelLogsCleanup\\Facades\\LaravelLogsCleanup"
             }
         }
     },
