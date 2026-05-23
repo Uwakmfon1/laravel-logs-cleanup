@@ -1,7 +1,6 @@
-<?php 
+<?php
 
 namespace Uwakmfon1\LaravelLogsCleanup\Services;
-
 
 class LogParser
 {
@@ -11,14 +10,14 @@ class LogParser
     {
         $handle = fopen($path, 'r');
 
-        if (!$handle) {
+        if (! $handle) {
             throw new \RuntimeException("Unable to open log file: {$path}");
         }
 
         $currentEntry = '';
         while (($line = fgets($handle)) !== false) {
             if (preg_match($this->pattern, $line)) {
-                 if (! empty($currentEntry)) {
+                if (! empty($currentEntry)) {
                     yield $currentEntry;
                 }
 
@@ -37,7 +36,6 @@ class LogParser
         fclose($handle);
     }
 }
-
 
 // WHY THIS IS CORRECT
 

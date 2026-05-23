@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace Uwakmfon1\LaravelLogsCleanup\Exceptions;
 

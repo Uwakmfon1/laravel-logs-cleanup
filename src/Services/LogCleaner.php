@@ -1,16 +1,15 @@
-<?php 
+<?php
 
 namespace Uwakmfon1\LaravelLogsCleanup\Services;
+
 use Carbon\Carbon;
 
 class LogCleaner
 {
-      public function __construct(
+    public function __construct(
         protected LogParser $parser,
         protected TempFileManager $tempFileManager
-    ) {
-    }
-
+    ) {}
 
     public function clean(
         Carbon $cutoffDate,
@@ -29,7 +28,7 @@ class LogCleaner
         */
 
         if (! file_exists($logFile)) {
-            throw new \RuntimeException("laravel.log does not exist.");
+            throw new \RuntimeException('laravel.log does not exist.');
         }
 
         /*
@@ -156,7 +155,8 @@ class LogCleaner
             'new_size_mb' => round($newSize / 1024 / 1024, 2),
         ];
     }
- protected function extractDate(string $entry): ?Carbon
+
+    protected function extractDate(string $entry): ?Carbon
     {
         preg_match(
             '/^\[(.*?)\]/',
