@@ -1,6 +1,6 @@
 {
     "name": "uwakmfon1/laravel-logs-cleanup",
-    "description": "This is my package laravel-logs-cleanup",
+    "description": "A Laravel package for cleaning old log files automatically.",
     "keywords": [
         "Uwakmfon1",
         "laravel",
@@ -11,8 +11,8 @@
     "authors": [
         {
             "name": "Uwakmfon1",
-            "email": "udohuwakmfon2@gmail.com",
-            "role": "Developer"
+            "email": "work.devhodu@gmail.com",
+            "role": "Code Artisan"
         }
     ],
     "require": {
