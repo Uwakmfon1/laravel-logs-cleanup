@@ -1,19 +1,22 @@
-# This is my package laravel-logs-cleanup
+# Laravel Logs Cleanup
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/uwakmfon1/laravel-logs-cleanup.svg?style=flat-square)](https://packagist.org/packages/uwakmfon1/laravel-logs-cleanup)
 [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/uwakmfon1/laravel-logs-cleanup/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/uwakmfon1/laravel-logs-cleanup/actions?query=workflow%3Arun-tests+branch%3Amain)
 [![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/uwakmfon1/laravel-logs-cleanup/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/uwakmfon1/laravel-logs-cleanup/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/uwakmfon1/laravel-logs-cleanup.svg?style=flat-square)](https://packagist.org/packages/uwakmfon1/laravel-logs-cleanup)
 
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
+A lightweight Laravel package for cleaning old entries from storage/logs/laravel.log based on a specified number of days to preserve.
 
-## Support us
+Ideal for large log files containing thousands of lines.
 
-[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/laravel-logs-cleanup.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/laravel-logs-cleanup)
+## Features
+- Cleans only storage/logs/laravel.log
+- Preserves recent logs
+- Supports dry-run mode
+- Creates backup files
+- Memory-efficient stream processing
+- Safe for large log files
 
-We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
-
-We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
 
 ## Installation
 
@@ -23,56 +26,83 @@ You can install the package via composer:
 composer require uwakmfon1/laravel-logs-cleanup
 ```
 
-You can publish and run the migrations with:
-
-```bash
-php artisan vendor:publish --tag="laravel-logs-cleanup-migrations"
-php artisan migrate
-```
-
+## Publish Configuration
 You can publish the config file with:
 
 ```bash
 php artisan vendor:publish --tag="laravel-logs-cleanup-config"
 ```
-
-This is the contents of the published config file:
+## Configuration
+File:
+```
+config/logs-cleanup.php
+```
+Example:
 
 ```php
 return [
+
+    'log_file' => storage_path('logs/laravel.log'),
+
+    'temp_file' => storage_path('logs/laravel-temp.log'),
+
+    'create_backup' => true,
 ];
 ```
 
-Optionally, you can publish the views using
-
-```bash
-php artisan vendor:publish --tag="laravel-logs-cleanup-views"
-```
-
 ## Usage
+### Clear Old Logs
+Keep logs from the last 3 days:
 
-```php
-$laravelLogsCleanup = new Uwakmfon1\LaravelLogsCleanup();
-echo $laravelLogsCleanup->echoPhrase('Hello, Uwakmfon1!');
+```Bash
+php artisan logs:clear --except=3
 ```
 
-## Testing
+## Dry Run
+Preview cleanup without deleting logs:
 
 ```bash
-composer test
+php artisan logs:clear --except=3 --dry-run
 ```
 
-## Changelog
+## How it Works
+The package:
 
-Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
+1. Reads laravel.log line-by-line
+2. Detects log timestamps
+3. Removes entries older than the cutoff date
+4. Writes valid logs into a temporary file
+5. Replaces the original log safely
 
-## Contributing
+This prevents memory exhaustion on large log files.
 
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+## Supported Log Format
+```
+[2026-05-23 10:30:22] local.ERROR: Something happened
+```
 
-## Security Vulnerabilities
+## Example Output
+```
+Cleaning logs older than 3 days...
 
-Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
+Backup created successfully.
+
+Removed: 85,421 lines
+Kept: 14,579 lines
+
+Log cleanup completed successfully.
+```
+
+## Local Package Development
+Inside another Laravel app:
+```
+composer config repositories.logs-cleaner path ../laravel-logs-cleanup
+```
+Install Locally: 
+```
+composer require uwakmfon1/laravel-logs-cleanup:dev-main
+```
+
 
 ## Credits
 
