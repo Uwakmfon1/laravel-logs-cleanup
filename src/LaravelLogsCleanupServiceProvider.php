@@ -11,8 +11,8 @@ class LaravelLogsCleanupServiceProvider extends PackageServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(
-            __DIR__.'/../config/logs-cleanup.php',
-            'logs-cleaner'
+            __DIR__ ."/../config/logs-cleanup.php",
+            'logs-cleanup'
         );
     }
 
