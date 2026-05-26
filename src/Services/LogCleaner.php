@@ -3,6 +3,7 @@
 namespace Uwakmfon1\LaravelLogsCleanup\Services;
 
 use Carbon\Carbon;
+use RuntimeException;
 
 class LogCleaner
 {
@@ -88,7 +89,7 @@ class LogCleaner
         | Parse & Filter
         |--------------------------------------------------------------------------
         */
-
+        $hasEntries = false;
         foreach ($this->parser->parse($logFile) as $entry) {
 
             $entryDate = $this->extractDate($entry);
@@ -130,8 +131,13 @@ class LogCleaner
             */
 
             $removedEntries++;
-        }
+            $hasEntries = true;
+            break; // Stop after first old entry to optimize for recent logs
+            }
 
+            if(! $hasEntries) {
+                throw new RuntimeException('No log entries found. Aborting cleanup.');
+            }   
         fclose($tempHandle);
 
         /*
@@ -181,7 +187,7 @@ class LogCleaner
     public function getLatestDate(string $file): ?Carbon
     {
         $latestDate = null;
-
+        $hasAnyValid = false;
         foreach ($this->parser->parse($file) as $entry) {
 
             $entryDate = $this->extractDate($entry);
@@ -189,12 +195,13 @@ class LogCleaner
             if (! $entryDate) {
                 continue;
             }
+            $hasAnyValid = true;
 
             if (! $latestDate || $entryDate->gt($latestDate)) {
                 $latestDate = $entryDate;
             }
         }
 
-        return $latestDate;
+        return $hasAnyValid ? $latestDate : null;
     }
 }

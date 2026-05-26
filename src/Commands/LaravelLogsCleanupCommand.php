@@ -31,9 +31,9 @@ class LaravelLogsCleanupCommand extends Command
         $referenceDate = $cleaner->getLatestDate($this->logFile);
 
         if (! $referenceDate) {
-            throw new RuntimeException(
-                'No valid log dates found.'
-            );
+            $this->warn('No valid timestamps found in log file. Nothing to clean.');
+
+            return self::SUCCESS;
         }
 
         $cutoffDate = $referenceDate
