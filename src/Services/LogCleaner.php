@@ -177,4 +177,24 @@ class LogCleaner
             return null;
         }
     }
+
+    public function getLatestDate(string $file): ?Carbon
+    {
+        $latestDate = null;
+
+        foreach ($this->parser->parse($file) as $entry) {
+
+            $entryDate = $this->extractDate($entry);
+
+            if (! $entryDate) {
+                continue;
+            }
+
+            if (! $latestDate || $entryDate->gt($latestDate)) {
+                $latestDate = $entryDate;
+            }
+        }
+
+        return $latestDate;
+    }
 }

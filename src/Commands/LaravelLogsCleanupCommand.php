@@ -4,10 +4,18 @@ namespace Uwakmfon1\LaravelLogsCleanup\Commands;
 
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use RuntimeException;
 use Uwakmfon1\LaravelLogsCleanup\Services\LogCleaner;
 
 class LaravelLogsCleanupCommand extends Command
 {
+    protected string $logFile;
+    public function __construct()
+    {
+        parent::__construct();
+        $this->logFile = config('logs-cleanup.log_file',storage_path('logs/laravel.log'));
+    }
+   
     protected $signature = '
         logs:clear
         {--except=3: Number of recent days to preserve}
@@ -20,8 +28,19 @@ class LaravelLogsCleanupCommand extends Command
     public function handle(LogCleaner $cleaner): int
     {
         $days = (int) $this->option('except');
+        $referenceDate = $cleaner->getLatestDate($this->logFile);
 
-        $cutoffDate = Carbon::now()->subDays($days)->startOfDay();
+        if (! $referenceDate) {
+            throw new RuntimeException(
+                'No valid log dates found.'
+            );
+        }
+
+        $cutoffDate = $referenceDate
+            ->copy()
+            ->subDays($days)
+            ->startOfDay();
+
         $this->info('Preserving logs from {$cutoffDate} till now.');
 
         if (! $this->option('force') && ! $this->confirm('Do you want to proceed with log cleanup?')) {
