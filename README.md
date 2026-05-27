@@ -51,10 +51,17 @@ return [
 ```
 
 ## Usage
-### Clear Old Logs
+### Clear entire log file
+
+```bash
+php artisan logs:clear
+```
+
+### Clear old logs, keep recent days
+
 Keep logs from the last 3 days:
 
-```Bash
+```bash
 php artisan logs:clear --except=3
 ```
 
@@ -62,6 +69,7 @@ php artisan logs:clear --except=3
 Preview cleanup without deleting logs:
 
 ```bash
+php artisan logs:clear --dry-run
 php artisan logs:clear --except=3 --dry-run
 ```
 

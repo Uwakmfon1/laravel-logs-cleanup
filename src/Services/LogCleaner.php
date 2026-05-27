@@ -12,6 +12,48 @@ class LogCleaner
         protected TempFileManager $tempFileManager
     ) {}
 
+    public function clearAll(bool $dryRun = false): array
+    {
+        $logFile = config('logs-cleanup.log_file');
+
+        if (! file_exists($logFile)) {
+            throw new \RuntimeException('laravel.log does not exist.');
+        }
+
+        $createBackup = config('logs-cleanup.create_backup')
+            ?? config('logs-cleanup.backup')
+            ?? false;
+
+        $originalSize = filesize($logFile);
+        $entryCount = 0;
+
+        foreach ($this->parser->parse($logFile) as $entry) {
+            $entryCount++;
+        }
+
+        if ($dryRun) {
+            return [
+                'removed_entries' => $entryCount,
+                'preserved_entries' => 0,
+                'original_size_mb' => round($originalSize / 1024 / 1024, 2),
+                'new_size_mb' => 0,
+            ];
+        }
+
+        if ($createBackup && is_file($logFile) && $originalSize > 0) {
+            copy($logFile, "{$logFile}.bak");
+        }
+
+        file_put_contents($logFile, '');
+
+        return [
+            'removed_entries' => $entryCount,
+            'preserved_entries' => 0,
+            'original_size_mb' => round($originalSize / 1024 / 1024, 2),
+            'new_size_mb' => 0,
+        ];
+    }
+
     public function clean(
         Carbon $cutoffDate,
         bool $dryRun = false
@@ -20,7 +62,9 @@ class LogCleaner
 
         $tempFile = config('logs-cleanup.temp_file');
 
-        $createBackup = config('logs-cleanup.create_backup') ?? false;
+        $createBackup = config('logs-cleanup.create_backup')
+            ?? config('logs-cleanup.backup')
+            ?? false;
 
         /*
         |--------------------------------------------------------------------------
@@ -84,67 +128,39 @@ class LogCleaner
 
         $tempHandle = $this->tempFileManager->create($tempFile);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Parse & Filter
-        |--------------------------------------------------------------------------
-        */
-        $hasEntries = false;
         foreach ($this->parser->parse($logFile) as $entry) {
-
             $entryDate = $this->extractDate($entry);
 
-            /*
-            |--------------------------------------------------------------------------
-            | Invalid Entries
-            |--------------------------------------------------------------------------
-            */
-
-            if (! $entryDate) {
-
+            if (! $entryDate || $entryDate->gte($cutoffDate)) {
                 fwrite($tempHandle, $entry);
-
                 $preservedEntries++;
 
                 continue;
             }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Preserve Recent Logs
-            |--------------------------------------------------------------------------
-            */
-
-            if ($entryDate->gte($cutoffDate)) {
-
-                fwrite($tempHandle, $entry);
-
-                $preservedEntries++;
-
-                continue;
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Remove Old Logs
-            |--------------------------------------------------------------------------
-            */
 
             $removedEntries++;
-            $hasEntries = true;
-            break; // Stop after first old entry to optimize for recent logs
-            }
+        }
 
-            if(! $hasEntries) {
-                throw new RuntimeException('No log entries found. Aborting cleanup.');
-            }   
         fclose($tempHandle);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Replace Original File
-        |--------------------------------------------------------------------------
-        */
+        if ($removedEntries === 0) {
+            @unlink($tempFile);
+
+            return [
+                'removed_entries' => 0,
+                'preserved_entries' => $preservedEntries,
+                'original_size_mb' => round($originalSize / 1024 / 1024, 2),
+                'new_size_mb' => round($originalSize / 1024 / 1024, 2),
+            ];
+        }
+
+        if ($preservedEntries > 0 && (! is_file($tempFile) || filesize($tempFile) === 0)) {
+            @unlink($tempFile);
+
+            throw new RuntimeException(
+                'Cleanup produced an empty temp file; original log was not modified.'
+            );
+        }
 
         $this->tempFileManager->replace(
             tempFile: $tempFile,
@@ -201,6 +217,8 @@ class LogCleaner
                 $latestDate = $entryDate;
             }
         }
+
+
 
         return $hasAnyValid ? $latestDate : null;
     }

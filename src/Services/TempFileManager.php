@@ -19,14 +19,16 @@ class TempFileManager
         string $originalFile,
         bool $backup = true,
     ): void {
-        if ($backup) {
-            copy(
-                $originalFile,
-                "{$originalFile}.bak"
-            );
+        if (! is_file($tempFile)) {
+            throw new \RuntimeException("Temp file missing: {$tempFile}");
         }
 
-        unlink($originalFile);
-        rename($tempFile, $originalFile);
+        if ($backup && is_file($originalFile)) {
+            copy($originalFile, "{$originalFile}.bak");
+        }
+
+        if (! rename($tempFile, $originalFile)) {
+            throw new \RuntimeException('Failed to replace log file.');
+        }
     }
 }

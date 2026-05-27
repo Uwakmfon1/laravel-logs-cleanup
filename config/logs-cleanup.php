@@ -6,7 +6,7 @@ return [
 
     'temp_file' => storage_path('logs/laravel-cleaner.tmp'),
 
-    'backup' => true,
+    'create_backup' => true,
 
     'chunk_size' => 8192,
 ];
